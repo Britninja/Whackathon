@@ -16,10 +16,11 @@ Contact: <rock-blimbing-robots@diff.u-bordeaux.fr>
 
 Discord: <http://discord.gg/uhJsQwQcX>
 
-Onboarding Slides: https://rock-climbing-robots.github.io/onboarding/01_onboarding.html
+Onboarding Slides: <https://rock-climbing-robots.github.io/onboarding/01_onboarding.html>
 
 Technical Slides: <https://rock-climbing-robots.github.io/slides/01_toolkit.html?font=sans>
 
+Gitmoji (e.g. for commit messages): <https://gitmoji.dev/>
 
 ## ToDos
 
@@ -28,6 +29,7 @@ Technical Slides: <https://rock-climbing-robots.github.io/slides/01_toolkit.html
   - Learning > winning
 
 ## Angles - Yaw Pitch Roll
+
 ![Yaw](assets/YawPitchRoll.png)
 
 ## Setup
