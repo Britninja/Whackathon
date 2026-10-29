@@ -21,9 +21,11 @@ Technical Slides: <https://rock-climbing-robots.github.io/slides/01_toolkit.html
 ## ToDos
 
 - [ ] Use uv
-
 - [x] What's the team goal? learning? winning? Should we calculate how we could get the most points?
-  - Apprendre
+  - Learning > winning
+
+## Angles - Yaw Pitch Roll
+![Yaw](assets/YawPitchRoll.png)
 
 ## Setup
 
