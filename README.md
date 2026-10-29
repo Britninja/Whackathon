@@ -16,7 +16,10 @@ Contact: <rock-blimbing-robots@diff.u-bordeaux.fr>
 
 Discord: <http://discord.gg/uhJsQwQcX>
 
+Onboarding Slides: https://rock-climbing-robots.github.io/onboarding/01_onboarding.html
+
 Technical Slides: <https://rock-climbing-robots.github.io/slides/01_toolkit.html?font=sans>
+
 
 ## ToDos
 
