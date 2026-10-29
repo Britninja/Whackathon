@@ -1,0 +1,5 @@
+microban-sim
+microban-model
+mujoco<4,>=3.11
+numpy>=1.26
+pillow>=10
