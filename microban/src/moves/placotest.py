@@ -13,6 +13,7 @@ with open(MAP_PATH, "r") as f:
 
 print(_HOLDS_MAP)
 
+# TODO: Are these world or robot positions
 _START_HOLDS = {
     "right_foot": _HOLDS_MAP[0],
     "left_foot": _HOLDS_MAP[1],
@@ -56,20 +57,59 @@ class PlacotestMove:
         self._solver = placo.KinematicsSolver(self._robot)
 
         # Three limbs stay on their holds (hard constraints)...
-        print("Start angles")
-        print("self._robot.joint_names()")
-
-        left_hand = np.eye(4)
-        T_left_hand = np.eye(4)
-        # self._robot.set_T_world_frame("left_foot", self._T_left_foot)
+        T_left_foot = np.eye(4)  # set left foot to
+        # robot_frame_viz
+        self._robot.set_T_world_frame("left_foot", T_left_foot)
 
         for name in self._robot.joint_names():
             print(name)
             print(self._robot.get_joint(name))
         # for limb in ["left_foot", "right_foot", "left_hand"]:
         #     print(f"{limb}:\t{self._robot.get_joint(limb)}")
-        # task = self._solver.add_position_task(limb, holds[limb])
-        # task.configure(limb, "hard")
+
+        limb = "left_foot"  # (au debut gauche sets to origin)
+
+        # floating base 6 degrees of freedom (Rotation + translation + 6dof)
+        # left_foot is dans le model urdf
+        # corps avec un repere fixe => urdf
+        # ==> mujoco introduces sites => ce sont des frames?
+        # T_world_left_foot =  self._robot.get_T_world_frame('left_foot')
+
+        # simul ball position
+        # sockets = hold centers
+
+        # add_position_task(frame_name: str, target_world: ndarray) → DynamicsPositionTask
+        # Adds a position (in the world) task.
+
+        # tf from placo_utils
+        # frame task = position + orientation
+        # position trask
+        # position = vector at 0,0,0 not eye (becase)
+        # solver add_regularization_task (trouver la solution ou le robot bouge le petit possible)
+        # jouer avec les pendaration pour l'importances des constraints
+        # task.configure
+        # TODO: what is the difference between hard and soft tasks constraint
+        # mettre tache pour les boules => position not frame tasks
+        # boule nach unten zeigend z.b. tache d'orientation (damit man den ball nicht anders hält)
+        # masquees des axes quand j'utilise les taches
+        # task.mask.set_axis("yz")
+        # kinematics
+        # weight: position % orientations
+        # solver dump_task => debug
+        # mettre des regularization pour le corps
+
+        # meshcat (hat schon support von placo), ansonsten kann ich auch viser probieren
+
+        # TODO: Where can I see the model info (xml sites, joints)
+        # Parameters:
+        # target_world (numpy.ndarray) – target position in the world
+        holds = {"left_foot_ball": _START_HOLDS["left_foot_ball"]}
+        task = self._solver.add_position_task(limb, holds[limb])
+        task.configure(limb, "hard")
+
+        # from leftPoint to world
+        T_world_left = self._robot.get_T_world_frame("left_foot_ball")
+        # robot = state and also a model
 
         # ... the fourth one reaches for the next hold (soft)
         # reach = self._solver.add_position_task("right_hand", next_hold)

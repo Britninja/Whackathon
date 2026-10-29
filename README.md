@@ -22,6 +22,8 @@ Technical Slides: <https://rock-climbing-robots.github.io/slides/01_toolkit.html
 
 Gitmoji (e.g. for commit messages): <https://gitmoji.dev/>
 
+Placo Examples: <https://github.com/Rhoban/placo-examples/tree/master>
+
 ## ToDos
 
 - [ ] Use uv
