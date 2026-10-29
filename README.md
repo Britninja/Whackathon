@@ -18,9 +18,34 @@ Discord: <http://discord.gg/uhJsQwQcX>
 
 ## ToDos
 
-- [ ] Ask about the 1.5x vs. 1x penalty for using aruco markers or not
 - [ ] Use uv
-- [ ] What's the team goal? learning? winning? Should we calculate how we could get the most points?
+
+- [x] What's the team goal? learning? winning? Should we calculate how we could get the most points?
+  - Apprendre
+
+## Setup
+
+Quick start
+Climber Microban (be careful it's dev_v2 branch)
+<https://github.com/Rhoban/microban/tree/dev_v2>
+
+Example repository for RL with Microban
+<https://github.com/Rhoban/mjlab_microban/>
+
+Quickstart:
+
+```sh
+git clone -b dev_v2 <git@github.com>:Rhoban/microban.git
+cd microban
+make sim WALL=N2
+make dashboard # And select 127.0.0.1
+```
+
+Simulator (used by Microban in make sim)
+<https://github.com/rock-climbing-robots/simulator>
+
+Can be used to design wall with:
+uv run climbing-sim-wall-editor
 
 ## Robots' WiFi
 
