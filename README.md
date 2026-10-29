@@ -16,6 +16,8 @@ Contact: <rock-blimbing-robots@diff.u-bordeaux.fr>
 
 Discord: <http://discord.gg/uhJsQwQcX>
 
+Technical Slides: <https://rock-climbing-robots.github.io/slides/01_toolkit.html?font=sans>
+
 ## ToDos
 
 - [ ] Use uv
