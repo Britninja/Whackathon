@@ -35,7 +35,7 @@ Example repository for RL with Microban
 Quickstart:
 
 ```sh
-git clone -b dev_v2 <git@github.com>:Rhoban/microban.git
+git clone -b dev_v2 git@github.com:Rhoban/microban.git
 cd microban
 make sim WALL=N2
 make dashboard # And select 127.0.0.1
