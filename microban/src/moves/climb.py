@@ -5,7 +5,6 @@ import time
 import numpy as np
 import placo
 import microban_model
-from constants import NEUTRAL_POSE
 from placo_utils.visualization import robot_viz, points_viz
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
@@ -14,9 +13,6 @@ MAP_PATH = PROJECT_ROOT / "simulator/climbing_sim/walls" / "N1.json"
 with open(MAP_PATH, "r") as f:
     _HOLDS_MAP = json.load(f)
 
-
-print('_HOLDS_MAP["holds"][0]')
-print(_HOLDS_MAP["holds"][0])
 # TODO: Are these world or robot positions
 _START_HOLDS = {
     "right_foot": _HOLDS_MAP["holds"][0],
@@ -64,7 +60,6 @@ class ClimbMove:
     }
     variants = ("climber",)
 
-
     def __init__(self) -> None:
         # "Holds" position (just for visualization)
         self._vis_holds = [
@@ -78,15 +73,13 @@ class ClimbMove:
         )
         self._solver = placo.KinematicsSolver(self._robot)
 
-
-
         # Set left foot as world origin
         self._T_left_foot = np.eye(4)
         self._robot.set_T_world_frame("left_foot", self._T_left_foot)
         self._robot.update_kinematics()
 
         # Set center of mass to robot center of mass (in world coordinates)
-        #self._com_initial = self._robot.com_world()
+        # self._com_initial = self._robot.com_world()
         T_right_foot = self._robot.get_T_world_frame("right_foot").copy()
         T_right_foot[2, 3] = 0.0
 
