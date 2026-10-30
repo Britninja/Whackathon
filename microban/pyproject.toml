@@ -11,6 +11,7 @@ dependencies = [
     "pollen_bmi088_imu_library==1.0.0rc1",
     "rustypot>=1.13.1",            # fast sync read (robot_controller.py); the motor tools pin the same
     "microban-model",      # the robot's MJCF / URDF (Rhoban/microban_model; meshes in Git LFS)
+    "pin>=3.8.0",
 ]
 
 [dependency-groups]
