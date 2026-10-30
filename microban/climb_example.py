@@ -1,8 +1,6 @@
 import time
-import pinocchio
 import placo
 import numpy as np
-from placo_utils.tf import tf
 from placo_utils.visualization import robot_viz, points_viz
 import microban_model
 
@@ -50,7 +48,7 @@ solver.enable_joint_limits(True)
 
 viz = robot_viz(robot)
 dt = 0.02  # [s]
-part_duration = 1.5  # [s]
+part_duration = 0.5  # [s]
 
 # TODO: maybe axis task: try to avoid collision of ball with the wall of the hold
 # TODO: parameterize, so that if a hold moves 1cm => make it so that you can reach anywhere the arms can reach => inverse kinematics
