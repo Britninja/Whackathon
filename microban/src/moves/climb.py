@@ -111,7 +111,7 @@ class ClimbMove:
         self._robot.set_T_world_frame("left_foot", self._T_left_foot)
         self._robot.update_kinematics()
 
-    def calc_4_waypoints(self, task, part_duration):
+    def calc_waypoints(self, task, part_duration):
         return [
             [0, task.target_world],
             [part_duration * 0.25, task.target_world + np.array([-0.05, 0, 0])],
@@ -131,53 +131,36 @@ class ClimbMove:
         ]  # [time, (x,y,z)]
 
     def step(self, obs):
-        return self.prof_version()
+        return self._climb()
 
-    def prof_version(self):
+    def _climb(self):
         viz = robot_viz(self._robot)
+        dt = 0.02  # [s]
         part_duration = 1.5  # [s]
 
-        task = self._tasks[self._task_rotation_index]
-        ball = self._ball_joints[self._task_rotation_index]
+        for i, task in enumerate(self._tasks):
+            ball = self._ball_joints[i]
 
-        print(f"task: {ball}")
+            print(f"task: {ball}")
 
-        waypoints = self.calc_4_waypoints(task, part_duration)
+            waypoints = self.calc_waypoints(task, part_duration)
 
-        trajectory = placo.CubicSpline3D()
-        velocity_3d = np.zeros(3)
-        for move_duration_t, pos_3d in waypoints:
-            trajectory.add_point(move_duration_t, pos_3d, velocity_3d)
+            trajectory = placo.CubicSpline3D()
+            velocity_3d = np.zeros(3)
+            for move_duration_t, pos_3d in waypoints:
+                trajectory.add_point(move_duration_t, pos_3d, velocity_3d)
 
-        position_dist_thresh = 2.0
-        curr_frame_world_mat = self._robot.get_T_world_frame(ball)
-        
-        print("curr_frame_world_mat")
-        print(curr_frame_world_mat)
+            t0 = time.time()
+            while time.time() - t0 < part_duration:
+                task.target_world = trajectory.pos(time.time() - t0)
 
-        curr_pos = curr_frame_world_mat[:3, -1] # hopefully this is the translation part so position? 
-        print(curr_pos)
+                self._solver.solve(True)
+                self._robot.update_kinematics()
 
-        print("task.target_world")
-        print(task.target_world)
+                points_viz("holds", self._vis_holds)
 
-        dist = curr_pos - task.target_world
-        
-        print("dist")
-        print(dist)
-        t0 = time.time()
-        while time.time() - t0 < part_duration:
-            task.target_world = trajectory.pos(time.time() - t0)
+                viz.display(self._robot.state.q)
 
-            self._solver.solve(True)
-            self._robot.update_kinematics()
-
-            points_viz("holds", self._vis_holds)
-
-            viz.display(self._robot.state.q)
-            #time.sleep(dt)
-            # move_duration_t += dt
-        if (np.linalg.norm(dist) >= position_dist_thresh):
-            self._task_rotation_index = (self._task_rotation_index + 1) % len(self._tasks)
+                time.sleep(dt)
 
         return {name: self._robot.get_joint(name) for name in JOINTS}
