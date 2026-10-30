@@ -75,7 +75,7 @@ class ClimbMove:
             "left_hand_ball",
             np.array([0, self.options["y_spacing"], self.options["z_spacing"] * 5]),
         )
-
+        self._ball_joints = ["right_foot_ball", "left_foot_ball", "right_hand_ball", "left_hand_ball"]
         self._tasks = [right_foot_task, left_foot_task, right_hand_task, left_hand_task]
 
         # Keep trunk parallel to the world
@@ -131,44 +131,43 @@ class ClimbMove:
         ]  # [time, (x,y,z)]
 
     def step(self, obs):
+        return self.prof_version()
+
+    def prof_version(self):
         viz = robot_viz(self._robot)
-        dt = 0.02  # [s]
         part_duration = 1.5  # [s]
-        # TODO: maybe axis task: try to avoid collision of ball with the wall of the hold
-        # TODO: parameterize, so that if a hold moves 1cm => make it so that you can reach anywhere the arms can reach => inverse kinematics
-        # Problem is a big space & there is only one solution
-        # <=> inverse kinematics = underdefined: there are many solutions, you don't know which one is the best
-        # kinematics = only geometry, not forces/torques
-        # => we migt plan a good ttrajectory, but the moteurs might not be strong enough
-        # Building a cubic trajectory for the limb that rise with clearance
+
         task = self._tasks[self._task_rotation_index]
-        waypoints = [
-            [0, task.target_world],
-            [part_duration * 0.25, task.target_world + np.array([-0.05, 0, 0])],
-            [
-                part_duration * 0.5,
-                task.target_world + np.array([-0.05, 0, self.options["z_spacing"]]),
-            ],
-            [
-                part_duration * 0.75,
-                task.target_world
-                + np.array([-0.025, 0, self.options["z_spacing"] + 0.02]),
-            ],
-            [
-                part_duration,
-                task.target_world + np.array([0, 0, self.options["z_spacing"]]),
-            ],
-        ]  # [time, (x,y,z)]
+        ball = self._ball_joints[self._task_rotation_index]
+
+        print(f"task: {ball}")
+
+        waypoints = self.calc_4_waypoints(task, part_duration)
 
         trajectory = placo.CubicSpline3D()
         velocity_3d = np.zeros(3)
         for move_duration_t, pos_3d in waypoints:
             trajectory.add_point(move_duration_t, pos_3d, velocity_3d)
 
-        # move_duration_t = 0
-        part_t0 = time.time()
-        while time.time() - part_t0 < part_duration:
-            task.target_world = trajectory.pos(time.time() - part_t0)
+        position_dist_thresh = 2.0
+        curr_frame_world_mat = self._robot.get_T_world_frame(ball)
+        
+        print("curr_frame_world_mat")
+        print(curr_frame_world_mat)
+
+        curr_pos = curr_frame_world_mat[:3, -1] # hopefully this is the translation part so position? 
+        print(curr_pos)
+
+        print("task.target_world")
+        print(task.target_world)
+
+        dist = curr_pos - task.target_world
+        
+        print("dist")
+        print(dist)
+        t0 = time.time()
+        while time.time() - t0 < part_duration:
+            task.target_world = trajectory.pos(time.time() - t0)
 
             self._solver.solve(True)
             self._robot.update_kinematics()
@@ -176,8 +175,9 @@ class ClimbMove:
             points_viz("holds", self._vis_holds)
 
             viz.display(self._robot.state.q)
-            time.sleep(dt)
+            #time.sleep(dt)
             # move_duration_t += dt
-        self._task_rotation_index = (self._task_rotation_index + 1) % len(self._tasks)
+        if (np.linalg.norm(dist) >= position_dist_thresh):
+            self._task_rotation_index = (self._task_rotation_index + 1) % len(self._tasks)
 
         return {name: self._robot.get_joint(name) for name in JOINTS}
