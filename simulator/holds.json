@@ -1,0 +1,433 @@
+{
+ "grid": {
+  "cols": 52,
+  "rows": 93,
+  "pitch_mm": 15.0
+ },
+ "holds": [
+  {
+   "col": 16,
+   "row": 4,
+   "x_mm": 259.5,
+   "y_mm": 53.2,
+   "color": "Bleu",
+   "n_cams": 1
+  },
+  {
+   "col": 27,
+   "row": 4,
+   "x_mm": 424.5,
+   "y_mm": 53.2,
+   "color": "Bleu",
+   "n_cams": 1
+  },
+  {
+   "col": 14,
+   "row": 7,
+   "x_mm": 229.4,
+   "y_mm": 97.9,
+   "color": "Orange",
+   "n_cams": 1
+  },
+  {
+   "col": 22,
+   "row": 7,
+   "x_mm": 349.4,
+   "y_mm": 97.9,
+   "color": "Orange",
+   "n_cams": 1
+  },
+  {
+   "col": 30,
+   "row": 9,
+   "x_mm": 469.4,
+   "y_mm": 127.9,
+   "color": "Orange",
+   "n_cams": 1
+  },
+  {
+   "col": 16,
+   "row": 11,
+   "x_mm": 259.5,
+   "y_mm": 158.2,
+   "color": "Bleu",
+   "n_cams": 1
+  },
+  {
+   "col": 19,
+   "row": 11,
+   "x_mm": 304.5,
+   "y_mm": 158.2,
+   "color": "Bleu",
+   "n_cams": 1
+  },
+  {
+   "col": 24,
+   "row": 11,
+   "x_mm": 379.5,
+   "y_mm": 158.2,
+   "color": "Bleu",
+   "n_cams": 1
+  },
+  {
+   "col": 27,
+   "row": 12,
+   "x_mm": 427.9,
+   "y_mm": 166.4,
+   "color": "Bleu",
+   "n_cams": 1
+  },
+  {
+   "col": 15,
+   "row": 16,
+   "x_mm": 244.4,
+   "y_mm": 232.9,
+   "color": "Orange",
+   "n_cams": 1
+  },
+  {
+   "col": 30,
+   "row": 16,
+   "x_mm": 469.4,
+   "y_mm": 232.9,
+   "color": "Orange",
+   "n_cams": 1
+  },
+  {
+   "col": 20,
+   "row": 19,
+   "x_mm": 319.5,
+   "y_mm": 278.2,
+   "color": "Bleu",
+   "n_cams": 1
+  },
+  {
+   "col": 25,
+   "row": 19,
+   "x_mm": 394.5,
+   "y_mm": 278.2,
+   "color": "Bleu",
+   "n_cams": 1
+  },
+  {
+   "col": 29,
+   "row": 20,
+   "x_mm": 454.5,
+   "y_mm": 293.2,
+   "color": "Bleu",
+   "n_cams": 1
+  },
+  {
+   "col": 15,
+   "row": 22,
+   "x_mm": 244.4,
+   "y_mm": 322.9,
+   "color": "Orange",
+   "n_cams": 1
+  },
+  {
+   "col": 24,
+   "row": 23,
+   "x_mm": 379.4,
+   "y_mm": 337.9,
+   "color": "Orange",
+   "n_cams": 1
+  },
+  {
+   "col": 19,
+   "row": 26,
+   "x_mm": 304.5,
+   "y_mm": 383.2,
+   "color": "Bleu",
+   "n_cams": 1
+  },
+  {
+   "col": 22,
+   "row": 26,
+   "x_mm": 349.5,
+   "y_mm": 383.2,
+   "color": "Bleu",
+   "n_cams": 1
+  },
+  {
+   "col": 30,
+   "row": 26,
+   "x_mm": 469.5,
+   "y_mm": 383.2,
+   "color": "Bleu",
+   "n_cams": 1
+  },
+  {
+   "col": 26,
+   "row": 30,
+   "x_mm": 409.4,
+   "y_mm": 442.9,
+   "color": "Orange",
+   "n_cams": 1
+  },
+  {
+   "col": 34,
+   "row": 30,
+   "x_mm": 529.4,
+   "y_mm": 442.9,
+   "color": "Orange",
+   "n_cams": 1
+  },
+  {
+   "col": 24,
+   "row": 33,
+   "x_mm": 379.5,
+   "y_mm": 488.2,
+   "color": "Bleu",
+   "n_cams": 1
+  },
+  {
+   "col": 29,
+   "row": 33,
+   "x_mm": 454.5,
+   "y_mm": 488.2,
+   "color": "Bleu",
+   "n_cams": 1
+  },
+  {
+   "col": 32,
+   "row": 33,
+   "x_mm": 499.5,
+   "y_mm": 488.2,
+   "color": "Bleu",
+   "n_cams": 1
+  },
+  {
+   "col": 19,
+   "row": 36,
+   "x_mm": 304.4,
+   "y_mm": 532.9,
+   "color": "Orange",
+   "n_cams": 1
+  },
+  {
+   "col": 28,
+   "row": 36,
+   "x_mm": 432.5,
+   "y_mm": 538.9,
+   "color": "Orange",
+   "n_cams": 1
+  },
+  {
+   "col": 36,
+   "row": 36,
+   "x_mm": 555.6,
+   "y_mm": 540.2,
+   "color": "Orange",
+   "n_cams": 1
+  },
+  {
+   "col": 23,
+   "row": 40,
+   "x_mm": 359.4,
+   "y_mm": 595.2,
+   "color": "Bleu",
+   "n_cams": 1
+  },
+  {
+   "col": 26,
+   "row": 40,
+   "x_mm": 409.5,
+   "y_mm": 593.2,
+   "color": "Bleu",
+   "n_cams": 1
+  },
+  {
+   "col": 32,
+   "row": 41,
+   "x_mm": 499.5,
+   "y_mm": 608.2,
+   "color": "Bleu",
+   "n_cams": 1
+  },
+  {
+   "col": 35,
+   "row": 41,
+   "x_mm": 544.5,
+   "y_mm": 608.2,
+   "color": "Bleu",
+   "n_cams": 1
+  },
+  {
+   "col": 21,
+   "row": 43,
+   "x_mm": 340.7,
+   "y_mm": 642.0,
+   "color": "Orange",
+   "n_cams": 1
+  },
+  {
+   "col": 30,
+   "row": 44,
+   "x_mm": 463.9,
+   "y_mm": 646.0,
+   "color": "Orange",
+   "n_cams": 1
+  },
+  {
+   "col": 38,
+   "row": 44,
+   "x_mm": 585.5,
+   "y_mm": 647.2,
+   "color": "Orange",
+   "n_cams": 1
+  },
+  {
+   "col": 27,
+   "row": 47,
+   "x_mm": 430.3,
+   "y_mm": 703.8,
+   "color": "Bleu",
+   "n_cams": 1
+  },
+  {
+   "col": 36,
+   "row": 47,
+   "x_mm": 554.4,
+   "y_mm": 705.5,
+   "color": "Bleu",
+   "n_cams": 1
+  },
+  {
+   "col": 38,
+   "row": 51,
+   "x_mm": 585.9,
+   "y_mm": 753.4,
+   "color": "Orange",
+   "n_cams": 1
+  },
+  {
+   "col": 27,
+   "row": 54,
+   "x_mm": 424.0,
+   "y_mm": 807.8,
+   "color": "Bleu",
+   "n_cams": 1
+  },
+  {
+   "col": 33,
+   "row": 55,
+   "x_mm": 518.9,
+   "y_mm": 817.8,
+   "color": "Bleu",
+   "n_cams": 1
+  },
+  {
+   "col": 36,
+   "row": 55,
+   "x_mm": 560.8,
+   "y_mm": 812.9,
+   "color": "Bleu",
+   "n_cams": 1
+  },
+  {
+   "col": 38,
+   "row": 58,
+   "x_mm": 586.1,
+   "y_mm": 859.2,
+   "color": "Orange",
+   "n_cams": 1
+  },
+  {
+   "col": 30,
+   "row": 65,
+   "x_mm": 465.5,
+   "y_mm": 969.3,
+   "color": "Orange",
+   "n_cams": 1
+  },
+  {
+   "col": 37,
+   "row": 65,
+   "x_mm": 571.2,
+   "y_mm": 964.4,
+   "color": "Orange",
+   "n_cams": 1
+  },
+  {
+   "col": 35,
+   "row": 69,
+   "x_mm": 544.5,
+   "y_mm": 1028.2,
+   "color": "Bleu",
+   "n_cams": 1
+  },
+  {
+   "col": 21,
+   "row": 72,
+   "x_mm": 333.8,
+   "y_mm": 1070.9,
+   "color": "Orange",
+   "n_cams": 1
+  },
+  {
+   "col": 28,
+   "row": 72,
+   "x_mm": 443.2,
+   "y_mm": 1068.3,
+   "color": "Orange",
+   "n_cams": 1
+  },
+  {
+   "col": 37,
+   "row": 72,
+   "x_mm": 571.3,
+   "y_mm": 1070.0,
+   "color": "Orange",
+   "n_cams": 1
+  },
+  {
+   "col": 34,
+   "row": 76,
+   "x_mm": 528.4,
+   "y_mm": 1129.7,
+   "color": "Bleu",
+   "n_cams": 1
+  },
+  {
+   "col": 28,
+   "row": 79,
+   "x_mm": 434.2,
+   "y_mm": 1175.6,
+   "color": "Orange",
+   "n_cams": 1
+  },
+  {
+   "col": 36,
+   "row": 79,
+   "x_mm": 556.8,
+   "y_mm": 1176.0,
+   "color": "Orange",
+   "n_cams": 1
+  },
+  {
+   "col": 18,
+   "row": 86,
+   "x_mm": 282.3,
+   "y_mm": 1281.9,
+   "color": "Orange",
+   "n_cams": 1
+  },
+  {
+   "col": 26,
+   "row": 86,
+   "x_mm": 405.4,
+   "y_mm": 1281.6,
+   "color": "Orange",
+   "n_cams": 1
+  },
+  {
+   "col": 34,
+   "row": 86,
+   "x_mm": 526.8,
+   "y_mm": 1281.8,
+   "color": "Orange",
+   "n_cams": 1
+  }
+ ]
+}

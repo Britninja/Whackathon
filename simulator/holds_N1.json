@@ -1,0 +1,585 @@
+{
+ "grid": {
+  "cols": 52,
+  "rows": 93,
+  "pitch_mm": 15.0
+ },
+ "holds": [
+  {
+   "col": 18,
+   "row": 2,
+   "x_mm": 291.7,
+   "y_mm": 22.3,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 21,
+   "row": 2,
+   "x_mm": 336.9,
+   "y_mm": 22.3,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 26,
+   "row": 2,
+   "x_mm": 412.4,
+   "y_mm": 22.2,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 29,
+   "row": 2,
+   "x_mm": 457.5,
+   "y_mm": 22.3,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 18,
+   "row": 7,
+   "x_mm": 291.8,
+   "y_mm": 96.6,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 21,
+   "row": 7,
+   "x_mm": 337.0,
+   "y_mm": 96.7,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 26,
+   "row": 7,
+   "x_mm": 412.4,
+   "y_mm": 96.6,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 29,
+   "row": 7,
+   "x_mm": 457.6,
+   "y_mm": 96.6,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 18,
+   "row": 12,
+   "x_mm": 291.7,
+   "y_mm": 172.1,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 21,
+   "row": 12,
+   "x_mm": 337.0,
+   "y_mm": 172.0,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 26,
+   "row": 12,
+   "x_mm": 412.4,
+   "y_mm": 172.1,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 29,
+   "row": 12,
+   "x_mm": 457.6,
+   "y_mm": 172.0,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 18,
+   "row": 17,
+   "x_mm": 291.7,
+   "y_mm": 247.5,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 21,
+   "row": 17,
+   "x_mm": 337.0,
+   "y_mm": 247.5,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 26,
+   "row": 17,
+   "x_mm": 412.4,
+   "y_mm": 247.5,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 29,
+   "row": 17,
+   "x_mm": 457.6,
+   "y_mm": 247.5,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 18,
+   "row": 22,
+   "x_mm": 291.9,
+   "y_mm": 323.0,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 21,
+   "row": 22,
+   "x_mm": 337.0,
+   "y_mm": 323.0,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 26,
+   "row": 22,
+   "x_mm": 412.4,
+   "y_mm": 323.0,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 29,
+   "row": 22,
+   "x_mm": 457.5,
+   "y_mm": 323.0,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 18,
+   "row": 27,
+   "x_mm": 291.8,
+   "y_mm": 398.5,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 21,
+   "row": 27,
+   "x_mm": 337.0,
+   "y_mm": 398.5,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 26,
+   "row": 27,
+   "x_mm": 412.4,
+   "y_mm": 398.5,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 29,
+   "row": 27,
+   "x_mm": 457.5,
+   "y_mm": 398.5,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 18,
+   "row": 32,
+   "x_mm": 291.8,
+   "y_mm": 473.8,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 21,
+   "row": 32,
+   "x_mm": 336.9,
+   "y_mm": 473.9,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 26,
+   "row": 32,
+   "x_mm": 412.4,
+   "y_mm": 473.9,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 29,
+   "row": 32,
+   "x_mm": 457.6,
+   "y_mm": 473.9,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 18,
+   "row": 37,
+   "x_mm": 291.7,
+   "y_mm": 549.2,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 21,
+   "row": 37,
+   "x_mm": 337.1,
+   "y_mm": 549.2,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 26,
+   "row": 37,
+   "x_mm": 412.4,
+   "y_mm": 549.3,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 29,
+   "row": 37,
+   "x_mm": 457.6,
+   "y_mm": 549.3,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 18,
+   "row": 42,
+   "x_mm": 291.7,
+   "y_mm": 624.7,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 21,
+   "row": 42,
+   "x_mm": 337.0,
+   "y_mm": 624.7,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 26,
+   "row": 42,
+   "x_mm": 412.4,
+   "y_mm": 624.7,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 29,
+   "row": 42,
+   "x_mm": 457.5,
+   "y_mm": 624.7,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 18,
+   "row": 47,
+   "x_mm": 291.7,
+   "y_mm": 700.0,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 21,
+   "row": 47,
+   "x_mm": 337.1,
+   "y_mm": 700.0,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 26,
+   "row": 47,
+   "x_mm": 412.4,
+   "y_mm": 700.0,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 29,
+   "row": 47,
+   "x_mm": 457.6,
+   "y_mm": 700.0,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 18,
+   "row": 52,
+   "x_mm": 291.8,
+   "y_mm": 775.4,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 21,
+   "row": 52,
+   "x_mm": 337.1,
+   "y_mm": 775.5,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 26,
+   "row": 52,
+   "x_mm": 412.4,
+   "y_mm": 775.4,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 29,
+   "row": 52,
+   "x_mm": 457.5,
+   "y_mm": 775.5,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 18,
+   "row": 57,
+   "x_mm": 291.8,
+   "y_mm": 850.9,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 21,
+   "row": 57,
+   "x_mm": 337.0,
+   "y_mm": 850.9,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 26,
+   "row": 57,
+   "x_mm": 412.3,
+   "y_mm": 850.8,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 29,
+   "row": 57,
+   "x_mm": 457.5,
+   "y_mm": 850.8,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 18,
+   "row": 62,
+   "x_mm": 291.8,
+   "y_mm": 926.1,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 21,
+   "row": 62,
+   "x_mm": 337.1,
+   "y_mm": 926.0,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 26,
+   "row": 62,
+   "x_mm": 412.4,
+   "y_mm": 926.0,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 29,
+   "row": 62,
+   "x_mm": 457.6,
+   "y_mm": 926.0,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 18,
+   "row": 67,
+   "x_mm": 291.9,
+   "y_mm": 1001.4,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 21,
+   "row": 67,
+   "x_mm": 337.1,
+   "y_mm": 1001.3,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 26,
+   "row": 67,
+   "x_mm": 412.4,
+   "y_mm": 1001.3,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 29,
+   "row": 67,
+   "x_mm": 457.6,
+   "y_mm": 1001.3,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 18,
+   "row": 72,
+   "x_mm": 291.8,
+   "y_mm": 1076.5,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 21,
+   "row": 72,
+   "x_mm": 337.1,
+   "y_mm": 1076.5,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 26,
+   "row": 72,
+   "x_mm": 412.4,
+   "y_mm": 1076.5,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 29,
+   "row": 72,
+   "x_mm": 457.6,
+   "y_mm": 1076.5,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 18,
+   "row": 77,
+   "x_mm": 291.9,
+   "y_mm": 1151.7,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 21,
+   "row": 77,
+   "x_mm": 337.1,
+   "y_mm": 1151.7,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 26,
+   "row": 77,
+   "x_mm": 412.4,
+   "y_mm": 1151.7,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 29,
+   "row": 77,
+   "x_mm": 457.6,
+   "y_mm": 1151.7,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 18,
+   "row": 82,
+   "x_mm": 291.9,
+   "y_mm": 1227.0,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 21,
+   "row": 82,
+   "x_mm": 337.0,
+   "y_mm": 1227.1,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 26,
+   "row": 82,
+   "x_mm": 412.5,
+   "y_mm": 1227.1,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 29,
+   "row": 82,
+   "x_mm": 457.5,
+   "y_mm": 1227.2,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 18,
+   "row": 87,
+   "x_mm": 291.8,
+   "y_mm": 1302.9,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 21,
+   "row": 87,
+   "x_mm": 337.0,
+   "y_mm": 1302.9,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 26,
+   "row": 87,
+   "x_mm": 412.4,
+   "y_mm": 1302.4,
+   "color": "Prise",
+   "n_cams": 2
+  },
+  {
+   "col": 29,
+   "row": 87,
+   "x_mm": 457.5,
+   "y_mm": 1302.4,
+   "color": "Prise",
+   "n_cams": 2
+  }
+ ]
+}
