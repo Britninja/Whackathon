@@ -104,48 +104,16 @@ class BasePlacoMove:
 
 class MoveRightArm(BasePlacoMove):
     """Fait bouger la main droite en X, Y, Z."""
-    variants = ("climber",)
     FRAME = "right_hand_ball"
-    option_docs = {
-        "dx_cm": "déplacement X (cm)",
-        "dy_cm": "déplacement Y (cm)",
-        "dz_cm": "déplacement Z (cm)",
-        "duration_s": "durée (s)",
-        "solver_iters": "itérations"
-    }
 
 class MoveLeftArm(BasePlacoMove):
     """Fait bouger la main gauche en X, Y, Z."""
-    variants = ("climber",)
     FRAME = "left_hand_ball"
-    option_docs = {
-        "dx_cm": "déplacement X (cm)",
-        "dy_cm": "déplacement Y (cm)",
-        "dz_cm": "déplacement Z (cm)",
-        "duration_s": "durée (s)",
-        "solver_iters": "itérations"
-    }
 
 class MoveRightLeg(BasePlacoMove):
     """Fait bouger le pied droit en X, Y, Z."""
-    variants = ("climber",)
     FRAME = "right_foot_ball"
-    option_docs = {
-        "dx_cm": "déplacement X (cm)",
-        "dy_cm": "déplacement Y (cm)",
-        "dz_cm": "déplacement Z (cm)",
-        "duration_s": "durée (s)",
-        "solver_iters": "itérations"
-    }
-
+    
 class MoveLeftLeg(BasePlacoMove):
     """Fait bouger le pied gauche en X, Y, Z."""
-    variants = ("climber",)
     FRAME = "left_foot_ball"
-    option_docs = {
-        "dx_cm": "déplacement X (cm)",
-        "dy_cm": "déplacement Y (cm)",
-        "dz_cm": "déplacement Z (cm)",
-        "duration_s": "durée (s)",
-        "solver_iters": "itérations"
-    }
