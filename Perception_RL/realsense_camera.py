@@ -6,7 +6,7 @@ from ultralytics import YOLO
 
 # 1. Charger YOLO
 print("Chargement de YOLO...")
-model = YOLO("/home/dani/Documents/Master2/Whackathon/runs/detect/runs/detect/prises_small_v2/weights/best.pt")
+model = YOLO("../runs/detect/runs/detect/prises_small_v2/weights/best.pt")
 print("YOLO chargé !")
 
 # 2. Configurer la RealSense
