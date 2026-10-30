@@ -39,7 +39,7 @@ try:
 
         image = np.asanyarray(color_frame.get_data())
         results = model.predict(source=image,conf=0.25, device="cpu",verbose=False)
-        annotated = results[0].plot()
+        annotated = results[0].plot(labels=False, conf=False)
         cv2.imshow("Whackathon - RealSense YOLO", annotated)
 
         if cv2.waitKey(1) & 0xFF == ord("q"):
