@@ -24,32 +24,6 @@ _START_HOLDS = {
 
 MJCF_PATH = str(microban_model.mjcf(climb=True))
 
-_LOWER_JOINTS = [
-    "left_hip_yaw",
-    "left_hip_roll",
-    "left_hip_pitch",
-    "left_knee",
-    "left_ankle_pitch",
-    "left_ankle_roll",
-    "right_hip_yaw",
-    "right_hip_roll",
-    "right_hip_pitch",
-    "right_knee",
-    "right_ankle_pitch",
-    "right_ankle_roll",
-]
-
-_UPPER_JOINTS = [
-    "left_shoulder_pitch",
-    "left_shoulder_roll",
-    "left_elbow",
-    "right_shoulder_pitch",
-    "right_shoulder_roll",
-    "right_elbow",
-]
-
-_JOINTS = _LOWER_JOINTS + _UPPER_JOINTS
-
 
 class ClimbMove:
     start_pose = "current"
@@ -138,19 +112,8 @@ class ClimbMove:
         self._robot.set_T_world_frame("left_foot", self._T_left_foot)
         self._robot.update_kinematics()
 
-    def step(self, obs):
-        viz = robot_viz(self._robot)
-        dt = 0.02  # [s]
-        part_duration = 1.5  # [s]
-        # TODO: maybe axis task: try to avoid collision of ball with the wall of the hold
-        # TODO: parameterize, so that if a hold moves 1cm => make it so that you can reach anywhere the arms can reach => inverse kinematics
-        # Problem is a big space & there is only one solution
-        # <=> inverse kinematics = underdefined: there are many solutions, you don't know which one is the best
-        # kinematics = only geometry, not forces/torques
-        # => we migt plan a good ttrajectory, but the moteurs might not be strong enough
-        # Building a cubic trajectory for the limb that rise with clearance
-        task = self._tasks[self._task_rotation_index]
-        waypoints = [
+    def calc_4_waypoints(self, task, part_duration):
+        return [
             [0, task.target_world],
             [part_duration * 0.25, task.target_world + np.array([-0.05, 0, 0])],
             [
@@ -167,6 +130,20 @@ class ClimbMove:
                 task.target_world + np.array([0, 0, self.options["z_spacing"]]),
             ],
         ]  # [time, (x,y,z)]
+
+    def step(self, obs):
+        viz = robot_viz(self._robot)
+        dt = 0.02  # [s]
+        part_duration = 1.5  # [s]
+        # TODO: maybe axis task: try to avoid collision of ball with the wall of the hold
+        # TODO: parameterize, so that if a hold moves 1cm => make it so that you can reach anywhere the arms can reach => inverse kinematics
+        # Problem is a big space & there is only one solution
+        # <=> inverse kinematics = underdefined: there are many solutions, you don't know which one is the best
+        # kinematics = only geometry, not forces/torques
+        # => we migt plan a good ttrajectory, but the moteurs might not be strong enough
+        # Building a cubic trajectory for the limb that rise with clearance
+        task = self._tasks[self._task_rotation_index]
+        waypoints = self.calc_4_waypoints(task, part_duration)
 
         trajectory = placo.CubicSpline3D()
         velocity_3d = np.zeros(3)
