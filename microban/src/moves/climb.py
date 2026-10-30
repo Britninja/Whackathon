@@ -6,6 +6,7 @@ import numpy as np
 import placo
 import microban_model
 from placo_utils.visualization import robot_viz, points_viz
+from simulator.climbing_sim import JOINTS
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 MAP_PATH = PROJECT_ROOT / "simulator/climbing_sim/walls" / "N1.json"
@@ -20,7 +21,6 @@ _START_HOLDS = {
     "right_hand": _HOLDS_MAP["holds"][2],
     "left_hand": _HOLDS_MAP["holds"][3],
 }
-
 
 MJCF_PATH = str(microban_model.mjcf(climb=True))
 
@@ -86,8 +86,7 @@ class ClimbMove:
         joints_task = self._solver.add_joints_task()
         joints_task.configure("joints", "soft", 1e-6)
 
-        self._joints = self._robot.joint_names()
-        joints_task.set_joints({joint: 0 for joint in self._joints})
+        joints_task.set_joints({joint: 0 for joint in JOINTS})
 
         # TODO: is this for not moving the body much in general?
         self._solver.add_regularization_task(1e-3)
@@ -99,7 +98,7 @@ class ClimbMove:
             self._robot.update_kinematics()
 
         self._start_target_angles = [
-            self._robot.get_joint(name) for name in self._joints
+            self._robot.get_joint(name) for name in JOINTS
         ]
         self._start_angles = self._start_target_angles.copy()
         self._task_rotation_index = 0
@@ -107,7 +106,7 @@ class ClimbMove:
     def start(self, obs) -> None:
         self.t0 = obs["time"]
         self.stop_t0 = None
-        for name, angle in zip(self._joints, self._start_angles):
+        for name, angle in zip(JOINTS, self._start_angles):
             self._robot.set_joint(name, angle)
         self._robot.set_T_world_frame("left_foot", self._T_left_foot)
         self._robot.update_kinematics()
@@ -143,7 +142,23 @@ class ClimbMove:
         # => we migt plan a good ttrajectory, but the moteurs might not be strong enough
         # Building a cubic trajectory for the limb that rise with clearance
         task = self._tasks[self._task_rotation_index]
-        waypoints = self.calc_4_waypoints(task, part_duration)
+        waypoints = [
+            [0, task.target_world],
+            [part_duration * 0.25, task.target_world + np.array([-0.05, 0, 0])],
+            [
+                part_duration * 0.5,
+                task.target_world + np.array([-0.05, 0, self.options["z_spacing"]]),
+            ],
+            [
+                part_duration * 0.75,
+                task.target_world
+                + np.array([-0.025, 0, self.options["z_spacing"] + 0.02]),
+            ],
+            [
+                part_duration,
+                task.target_world + np.array([0, 0, self.options["z_spacing"]]),
+            ],
+        ]  # [time, (x,y,z)]
 
         trajectory = placo.CubicSpline3D()
         velocity_3d = np.zeros(3)
@@ -165,4 +180,4 @@ class ClimbMove:
             # move_duration_t += dt
         self._task_rotation_index = (self._task_rotation_index + 1) % len(self._tasks)
 
-        return {name: self._robot.get_joint(name) for name in _JOINTS}
+        return {name: self._robot.get_joint(name) for name in JOINTS}

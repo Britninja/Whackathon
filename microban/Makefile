@@ -42,7 +42,7 @@ PYTHON ?= python
 sim:
 	@$(if $(WALL),test -f $(SIMULATOR)/pyproject.toml || { echo "The climbing simulator is not in $(SIMULATOR): \
 	git clone https://github.com/rock-climbing-robots/simulator $(SIMULATOR)  (or SIMULATOR=its/folder)"; exit 1; })
-	PYTHONPATH=src uv run --group sim $(if $(MICROBAN_SIM),--with-editable $(MICROBAN_SIM)) $(if $(WALL),--with-editable $(SIMULATOR)) \
+	PYTHONPATH=src:.. uv run --group sim $(if $(MICROBAN_SIM),--with-editable $(MICROBAN_SIM)) $(if $(WALL),--with-editable $(SIMULATOR)) \
 		$(PYTHON) src/sim/sim_main.py --hz 50 $(if $(WALL),,--variant $(VARIANT)) $(if $(MOVES),--moves $(MOVES)) \
 		$(if $(WALL),--wall $(WALL) --start $(START))
 
