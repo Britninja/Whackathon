@@ -17,11 +17,16 @@ OVER = {"hand": 0.05, "foot": 0.03}    # hauteur de passage au-dessus de la pris
 PRESS = {"hand": 0.04, "foot": 0.015}  # appui vers le mur à l'approche (viser un peu dans le
                                        # mur crée une force qui accroche la boule à la prise)
 
-# Posture de repos = pose de départ + ces préférences (rad, mêmes valeurs à gauche et à droite)
-REST_BIAS = {
-    "hip_pitch": -0.4,    # fléchir les hanches
-    "elbow": 0.8,         # plier les coudes
-    "ankle_pitch": 0.5,   # monter la pointe du pied
+# Posture de repos : angle visé (rad), le même à gauche et à droite.
+# Hanches très fléchies et genoux tendus (le bassin recule, les genoux restent loin des prises),
+# chevilles relevées, bras levés et coudes pliés (le corps reste près du mur).
+# Les articulations non listées gardent leur angle de la pose de départ.
+REST_POSTURE = {
+    "hip_pitch": -1.57,       # hanches fléchies au maximum
+    "knee": 0.01,             # genoux tendus
+    "ankle_pitch": 0.55,      # chevilles relevées
+    "shoulder_pitch": -2.0,   # bras levés
+    "elbow": 2.0,             # coudes pliés
 }
 
 # Pieds à plat sur le mur, presque parallèles
@@ -84,11 +89,11 @@ class BasePlacoMove:
             for f, task in cls.foot_ori.items():
                 task.configure(f"{f}_ori", "soft", 1e-3)
 
-            # Tâche d'orientation du tronc : reste à peu près droit
+            # Tâche d'orientation du tronc : reste à peu près droit, mais peut se pencher en arrière
             body_orientation_task = cls.solver.add_orientation_task("body", np.eye(3))
-            body_orientation_task.configure("body_orientation", "soft", 1e-3)
+            body_orientation_task.configure("body_orientation", "soft", 1e-4)
 
-            # Tâche articulaire : tire doucement vers la posture de repos (fixée au 1er start)
+            # Tâche articulaire : tire doucement vers la posture de repos (REST_POSTURE, fixée au 1er start)
             cls.joints_task = cls.solver.add_joints_task()
             cls.joints_task.configure("joints", "soft", 1e-5)
             cls.joints_task.set_joints({j: 0.0 for j in cls.model.joint_names()})
@@ -108,15 +113,15 @@ class BasePlacoMove:
         self._sync(obs)
 
         # Au premier mouvement, la pose de départ sert de référence :
-        # cibles des boules et posture de repos (pose de départ + REST_BIAS)
+        # cibles des boules, et angles de départ pour les articulations hors REST_POSTURE
         cls = BasePlacoMove
         if not cls.initialized:
             for f in FRAMES:
                 self.tasks[f].target_world = self.model.get_T_world_frame(f)[:3, 3].copy()
             rest = {}
             for j in self.model.joint_names():
-                bias = REST_BIAS.get(j.replace("left_", "").replace("right_", ""), 0.0)
-                rest[j] = self.model.get_joint(j) + bias
+                kind = j.replace("left_", "").replace("right_", "")
+                rest[j] = REST_POSTURE.get(kind, self.model.get_joint(j))
             self.joints_task.set_joints(rest)
             cls.initialized = True
 
