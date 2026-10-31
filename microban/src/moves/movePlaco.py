@@ -75,8 +75,9 @@ class BasePlacoMove:
     # PARTAGÉ par tous les mouvements
     robot = None
     solver = None
-    tasks = {}      # membre -> tâche de position
-    foot_ori = {}   # pied -> tâche d'orientation
+    tasks = {}       # membre -> tâche de position
+    foot_ori = {}    # pied -> tâche d'orientation
+    last_time = 0.0  # temps du dernier pas (partagé : le temps continue d'un membre à l'autre)
 
     def __init__(self):
         self.options = dict(self.options)
@@ -100,6 +101,7 @@ class BasePlacoMove:
         B.solver = placo.KinematicsSolver(B.robot)
         B.solver.mask_fbase(False)
         B.sync(obs)
+        B.last_time = obs["time"]
 
         # Une tâche de position par boule
         B.tasks = {}
@@ -110,8 +112,8 @@ class BasePlacoMove:
         # Pieds : à plat sur le mur, pointes légèrement vers l'intérieur
         toe_in = TOE_IN_SIGN * math.radians(TOE_IN_DEG)
         B.foot_ori = {
-            "right_foot": B.solver.add_orientation_task("right_foot", rot_x(-toe_in)),
-            "left_foot": B.solver.add_orientation_task("left_foot", rot_x(toe_in)),
+            "right_foot": B.solver.add_orientation_task(LIMB_FRAMES["right_foot"], rot_x(-toe_in)),
+            "left_foot": B.solver.add_orientation_task(LIMB_FRAMES["left_foot"], rot_x(toe_in)),
         }
         for foot, task in B.foot_ori.items():
             task.configure(f"{foot}_ori", "soft", FOOT_REST_WEIGHT)
@@ -135,10 +137,9 @@ class BasePlacoMove:
         if unknown:
             print(f"WARNING: unknown joints in DEFAULT_JOINT_ANGLES: {unknown}")
 
-    def start(self, obs):
+    def begin(self):
+        """Prépare le mouvement de ce membre : orientation des pieds et trajectoire."""
         B = BasePlacoMove
-        if B.robot is None:
-            B.setup(obs)
         print(f"------------\nMoving limb: {self.LIMB}")
 
         # Le pied actif reste à plat, l'autre garde juste un peu son angle
@@ -159,26 +160,29 @@ class BasePlacoMove:
         self.spline = placo.CubicSpline3D()
         for t, pos in waypoints:
             self.spline.add_point(t, pos, np.zeros(3))
-
         self.movement_time = 0.0
-        self.last_time = obs["time"]
         self.done = False
 
-    def step(self, obs):
+    def set_target(self, t):
+        """La boule de ce membre vise le point de sa trajectoire à l'instant t."""
+        BasePlacoMove.tasks[self.LIMB].target_world = self.spline.pos(t)
+
+    @staticmethod
+    def time_step(obs):
+        """Recopie les angles mesurés et renvoie le dt depuis le dernier pas."""
         B = BasePlacoMove
         B.sync(obs)
         now = obs["time"]
-        dt = now - self.last_time
-        self.last_time = now
+        dt = now - B.last_time
+        B.last_time = now
         if dt <= 0.0:
             dt = 1e-3
+        return dt
 
-        self.movement_time += dt
-        T = self.options["duration_s"]
-        B.tasks[self.LIMB].target_world = self.spline.pos(min(self.movement_time, T))
-        self.done = self.movement_time >= T
-
-        # Résout la cinématique et intègre les vitesses articulaires
+    @staticmethod
+    def solve(dt):
+        """Résout la cinématique, intègre les vitesses articulaires et renvoie les consignes."""
+        B = BasePlacoMove
         B.solver.dt = dt
         try:
             B.solver.solve(True)
@@ -187,8 +191,25 @@ class BasePlacoMove:
         for name in B.robot.joint_names():
             B.robot.set_joint(name, B.robot.get_joint(name) + B.robot.get_joint_velocity(name) * dt)
         B.robot.update_kinematics()
-
         return {name: B.robot.get_joint(name) for name in B.robot.joint_names()}
+
+    # --- Lancer un seul membre (touche du membre) ---
+
+    def start(self, obs):
+        B = BasePlacoMove
+        if B.robot is None:
+            B.setup(obs)
+        B.last_time = obs["time"]
+        self.begin()
+
+    def step(self, obs):
+        dt = self.time_step(obs)
+        self.movement_time += dt
+        if self.movement_time <= self.options["duration_s"]:
+            self.set_target(self.movement_time)
+        else:
+            self.done = True  # la boule reste sur sa dernière cible
+        return self.solve(dt)
 
 
 # --- Déclinaisons pour chaque membre ---

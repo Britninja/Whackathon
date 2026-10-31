@@ -16,18 +16,34 @@ class MoveClimb:
         self.options = dict(self.options)
         self.moves = [cls() for cls in ORDER]
 
+    def _next_limb(self):
+        """Passe au membre suivant et prépare sa trajectoire."""
+        self.current = self.moves[self.limb_index]
+        self.current.options["duration_s"] = self.options["duration_s"]
+        self.current.begin()
+        self.limb_index = (self.limb_index + 1) % len(self.moves)
+        self.count += 1
+
     def start(self, obs):
         BasePlacoMove.setup(obs)  # repart de la pose de départ à chaque appui sur c
+        self.limb_index = 0
         self.count = 0
-        self.current = None
+        self.movement_time = 0.0
+        self._next_limb()
 
     def step(self, obs):
-        # Mouvement fini (ou pas encore commencé) : on passe au membre suivant
-        if self.current is None or self.current.done:
-            if self.count >= 4 * self.options["cycles"]:
-                return  # escalade terminée
-            self.current = self.moves[self.count % 4]
-            self.current.options["duration_s"] = self.options["duration_s"]
-            self.current.start(obs)
-            self.count += 1
-        return self.current.step(obs)
+        dt = BasePlacoMove.time_step(obs)
+        self.movement_time += dt
+
+        # Mouvement en cours, ou fini : on passe au membre suivant dans le même pas
+        if self.movement_time <= self.options["duration_s"]:
+            self.current.set_target(self.movement_time)
+        else:
+            self._next_limb()
+            self.movement_time = 0.0
+            self.current.set_target(0.0)
+
+        targets = BasePlacoMove.solve(dt)
+        if self.count >= 4 * self.options["cycles"] + 1:
+            return  # escalade terminée
+        return targets
