@@ -122,13 +122,19 @@ def lire_calibration_enregistree(K, dist, intr):
 
 
 def trouver_prises(modele, image, confiance, appareil):
-    """Retourne uniquement les bounding boxes, dans les pixels de l'image rectifiee."""
     prediction = modele.predict(
-        source=image, conf=confiance, imgsz=640,
-        device=appareil, verbose=False
+        source=image,
+        conf=confiance,
+        iou=0.35,
+        agnostic_nms=True,
+        imgsz=640,
+        device=appareil,
+        verbose=False
     )[0]
+
     if prediction.boxes is None or len(prediction.boxes) == 0:
         return []
+
     return prediction.boxes.xyxy.cpu().numpy().tolist()
 
 
