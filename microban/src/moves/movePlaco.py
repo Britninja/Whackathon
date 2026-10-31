@@ -12,7 +12,7 @@ FEET = ("right_foot_ball", "left_foot_ball")
 # Trajectoire d'un membre (m) : se lève de LIFT, recule de BACK, monte jusqu'à OVER au-dessus
 # de la prise, avance en appuyant de PRESS vers le mur, puis se pose sur la prise.
 LIFT = 0.035
-BACK = 0.04
+BACK = 0.05
 OVER = {"hand": 0.05, "foot": 0.03}    # hauteur de passage au-dessus de la prise
 PRESS = {"hand": 0.04, "foot": 0.015}  # appui vers le mur à l'approche (viser un peu dans le
                                        # mur crée une force qui accroche la boule à la prise)
