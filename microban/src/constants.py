@@ -161,5 +161,5 @@ OBSERVATION_DOF_ORDER = [
 ]
 
 # The moves a key (make run's terminal, make sim's viewer) or a gamepad button toggles: add yours here
-MOVE_KEYS: dict[str, str] = {"h": "head", "s": "squat", "v": "walk"}
+MOVE_KEYS: dict[str, str] = {"h": "head", "s": "squat", "v": "walk", "c": "move_climb"}
 GAMEPAD_BUTTON_MOVES: dict[str, str] = {"A": "walk"}   # B is the gamepad's stop button (input/gamepad_input.py)
