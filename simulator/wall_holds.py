@@ -54,7 +54,7 @@ def detect_holds(images, colors=None, K=None, verbose=True):
             merged.append(dict(h, n=1))
     out = []
     for m in merged:
-        col, row = P.to_grid(m["x"], m["y"], *(m.get("off") or (None, None)))
+        col, row = P.mm_to_hole_index(m["x"], m["y"], m.get("offset_mm"))
         out.append({"col": int(col), "row": int(row), "x_mm": round(float(m["x"]), 1), "y_mm": round(float(m["y"]), 1),
                     "color": m["name"], "n_cams": m["n"]})
     return sorted(out, key=lambda h: (h["row"], h["col"]))
@@ -62,7 +62,7 @@ def detect_holds(images, colors=None, K=None, verbose=True):
 
 def save_holds(holds, path):
     with open(path, "w") as f:
-        json.dump({"grid": {"cols": P.N_COLS, "rows": P.N_ROWS, "pitch_mm": P.HOLE_PITCH}, "holds": holds}, f, indent=1)
+        json.dump({"grid": {"cols": P.N_HOLE_COLS, "rows": P.N_HOLE_ROWS, "pitch_mm": P.HOLE_SPACING_MM}, "holds": holds}, f, indent=1)
 
 
 def to_cells(holds):

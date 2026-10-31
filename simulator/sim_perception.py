@@ -84,15 +84,15 @@ def perceive(sim, cameras=CAMERAS, colors=None, save_prefix=None, verbose=True):
         else:
             merged.append(dict(h, n=1))
     for m in merged:
-        m["col"], m["row"] = P.to_grid(m["x"], m["y"], *(m.get("off") or (None, None)))
+        m["col"], m["row"] = P.mm_to_hole_index(m["x"], m["y"], m.get("offset_mm"))
     return merged, estimated
 
 
 def evaluate(detected, wall_holds):
-    """Compare aux prises du mur. Retourne (stats, HOLD_DX, HOLD_DY conseillés)."""
+    """Compare aux prises du mur. Retourne (stats, dx, dy conseillés pour SIM_HOLD_OFFSET_MM)."""
     truth = [(h.col, h.row) for h in wall_holds]
     # centre attendu de chaque prise dans le repère de la zone texturée (sans décalage de calibration)
-    exp = {t: ((t[0] + 1.5) * P.HOLE_PITCH, (t[1] + 0.5) * P.HOLE_PITCH) for t in truth}
+    exp = {t: ((t[0] + 1.5) * P.HOLE_SPACING_MM, (t[1] + 0.5) * P.HOLE_SPACING_MM) for t in truth}
     res_dx, res_dy = [], []
     for d in detected:
         t = min(truth, key=lambda t: np.hypot(d["x"] - exp[t][0], d["y"] - exp[t][1]))
@@ -102,11 +102,11 @@ def evaluate(detected, wall_holds):
     dx, dy = (float(np.median(res_dx)), float(np.median(res_dy))) if res_dx else (0.0, 0.0)
 
     def score(dxx, dyy):
-        got = {P.to_grid(d["x"], d["y"], dxx, dyy) for d in detected}
+        got = {P.mm_to_hole_index(d["x"], d["y"], (dxx, dyy)) for d in detected}
         return len(got & set(truth)), len(got - set(truth)), len(set(truth) - got)
 
     stats = {"vrai": len(truth), "detectees": len(detected),
-             "avant": score(P.HOLD_DX, P.HOLD_DY), "apres": score(dx, dy),
+             "avant": score(*P.SIM_HOLD_OFFSET_MM), "apres": score(dx, dy),
              "ecart_mm": float(np.mean(np.hypot(np.array(res_dx) - dx, np.array(res_dy) - dy))) if res_dx else float("nan")}
     return stats, dx, dy
 
@@ -164,11 +164,12 @@ def main():
     ok0, fp0, miss0 = stats["avant"]
     ok1, fp1, miss1 = stats["apres"]
     print(f"\nMur {wall} : {stats['vrai']} prises dans le JSON, {stats['detectees']} détectées")
-    print(f"  réglages actuels  (HOLD_DX={P.HOLD_DX:.1f}, HOLD_DY={P.HOLD_DY:.1f}) : "
+    sim_dx, sim_dy = P.SIM_HOLD_OFFSET_MM
+    print(f"  réglages actuels  (SIM_HOLD_OFFSET_MM=({sim_dx:.1f}, {sim_dy:.1f})) : "
           f"{ok0} exactes, {fp0} fausses, {miss0} manquées")
-    print(f"  après calibration (HOLD_DX={dx:.1f}, HOLD_DY={dy:.1f}) : "
+    print(f"  après calibration (SIM_HOLD_OFFSET_MM=({dx:.1f}, {dy:.1f})) : "
           f"{ok1} exactes, {fp1} fausses, {miss1} manquées, écart résiduel moyen {stats['ecart_mm']:.1f} mm")
-    print(f"=> mets HOLD_DX, HOLD_DY = {dx:.1f}, {dy:.1f} dans perception_rgb.py")
+    print(f"=> mets SIM_HOLD_OFFSET_MM = ({dx:.1f}, {dy:.1f}) dans perception/geometry.py")
     if cams:
         from climbing_sim import save_cameras
         save_cameras(cams, f"cameras_estimees_{wall}.json")
