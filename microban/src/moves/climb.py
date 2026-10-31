@@ -146,16 +146,15 @@ class ClimbMove:
         #     self._robot.set_joint(name, angle)
         # self._robot.set_T_world_frame("left_foot", self._T_left_foot)
         # self._robot.update_kinematics()
-        self._did_move = False
+        self._task_rotation_index = 0
+        self._limb_move_status = "ready"
         print("start climb")
+        self._viz = robot_viz(self._robot)
+
 
     def calc_target_update_waypoints(self, task, part_duration):
         prev_target = task.target_world  # Start trajectory at the old target
-        # xd = -0.05  # through wall
-        # yd = 0  # horizontally, left right
-        # zd = 0.02  # height
 
-        # define a wall point => transform the
         # x = rouge dans le mur; y gauche vert, bleue z,  (frame viz with identity (origin))
 
         x = [
@@ -167,110 +166,62 @@ class ClimbMove:
             0, # 5
             # 6
         ]  # x: into wall (- is away from wall)
+
         y = [0, 0, 0, 0, 0, 0]  # y: gauche
         z = [0, 3 * hole_dist, 3 * hole_dist, 6 * hole_dist, 6 * hole_dist, 5 * hole_dist]  # height
         n_steps = len(x)
-        steps = [None] * n_steps
+        steps = [[]] * n_steps
         for i in range(n_steps):
             steps[i] = [
                 (i / (n_steps - 1)) * part_duration,
                 prev_target + [x[i], y[i], z[i]],
             ]
         return steps
-        # return [
-        #     [0 * part_duration, prev_target],
-        #     [0.25 * part_duration, prev_target + [xs[0], ys[0], zs[0]]],
-        #     [0.5 * part_duration, prev_target + [0, ys[1], zs[1]]],
-        #     [0.75 * part_duration, prev_target + [0, ys[2], zs[2]]],
-        #     [1 * part_duration, prev_target + [0, ys[3], zs[3]]],
-        # ]
-
-        # return [
-        #     [0, prev_target],
-        #     [part_duration * 0.2, prev_target + np.array([xd, 0, zd])],
-        #     [
-        #         part_duration * 0.4,
-        #         prev_target + np.array([xd, 0, zd]),
-        #     ],
-        #     [
-        #         part_duration * 0.6,
-        #         prev_target + np.array([xd, 0, self.options["z_spacing"] + zd]),
-        #     ],
-        #     [
-        #         part_duration * 0.8,
-        #         prev_target + np.array([0, 0, self.options["z_spacing"] + zd]),
-        #     ],            [
-        #         part_duration,
-        #         prev_target + np.array([0, 0, self.options["z_spacing"]]),
-        #     ],
-        # ]  # [time, (x,y,z)]
 
     def step(self, obs):
-        return self._move_task(obs, self._tasks[2])
+        return self._move_limb(obs, self._tasks[self._task_rotation_index])
+
+    part_duration = 1.5  # [s]
 
 
-    def _move_task(self, obs, task):
-        if not self._did_move: 
-            viz = robot_viz(self._robot)
-            dt = 0.02  # [s]
-            part_duration = 1.5  # [s]
-            waypoints = self.calc_target_update_waypoints(task, part_duration)
-            trajectory = placo.CubicSpline3D()
-            for t, pos in waypoints:
-                trajectory.add_point(t, pos, np.zeros(3))
+    def _move_limb(self, obs, task):
+        match self._limb_move_status:
+            case "ready":
+                print("ready")
+                self._waypoints = self.calc_target_update_waypoints(task, self.part_duration)
+                self._trajectory = placo.CubicSpline3D()
+                for t, pos in self._waypoints:
+                    self._trajectory.add_point(t, pos, np.zeros(3))
+                self._limb_move_status = "running"
+                self._limb_move_t0 = time.time() + 20
+                return {}
+            case "running":
+                print("running")
+                if time.time() - self._limb_move_t0 < self.part_duration:
+                    task.target_world = self._trajectory.pos(time.time() - self._limb_move_t0)
 
-            t = 0
-            t0 = time.time()
-            while time.time() - t0 < part_duration:
-                task.target_world = trajectory.pos(time.time() - t0)
+                    self._solver.solve(True)
+                    self._robot.update_kinematics()
 
-                self._solver.solve(True)
-                self._robot.update_kinematics()
+                    points_viz("holds", self._vis_holds)
 
-                points_viz("holds", self._vis_holds)
+                    self._viz.display(self._robot.state.q)
 
-                viz.display(self._robot.state.q)
-                # time.sleep(dt)
-                # t += dt
-            self._did_move = True
-            return {name: self._robot.get_joint(name) for name in JOINTS}
+                print(f"target_world: {task.target_world}")
+                print(f"last waypoint: {self._waypoints[-1][1]}")
+                print(f"ball position: {self._robot.get_T_world_frame("left_foot_ball")}")
+                if np.allclose(task.target_world, self._waypoints[-1][1], atol=0.0001, rtol=0):
+                    self._limb_move_status = "finished"
+                return {name: self._robot.get_joint(name) for name in JOINTS}
+            case "finished":
+                print("finished")
+                self._task_rotation_index = (self._task_rotation_index + 1) % 4
+                self._limb_move_status = "ready"
+                return {}
+
         return {}
 
-    def _cycle_moves(self, obs):
+    def _cycle_limbs(self, obs):
         for task in self._tasks:
-            self._move_task(obs, task)
-        return {name: self._robot.get_joint(name) for name in JOINTS}
-
-
-    def _climb(self, obs):
-        viz = robot_viz(self._robot)
-        part_duration = 6  # [s]
-        print(f"Start climb: {time.time()}")
-
-        for i, task in enumerate(self._tasks):
-            ball = self._ball_joints[i]
-
-            print(f"task: {ball} at {time.time()}")
-
-            waypoints = self.calc_target_update_waypoints(task, part_duration)
-
-            trajectory = placo.CubicSpline3D()
-            velocity_3d = np.zeros(3)
-            for move_time_t, pos_3d in waypoints:
-                trajectory.add_point(move_time_t, pos_3d, velocity_3d)
-
-            t0 = time.time()
-            while time.time() - t0 < part_duration:
-                print("update target")
-                task.target_world = trajectory.pos(time.time() - t0)
-
-                self._solver.solve(True)
-                self._robot.update_kinematics()
-
-                points_viz("holds", self._vis_holds)
-
-                viz.display(self._robot.state.q)
-
-            time.sleep(max(0, part_duration - (time.time() - t0)))
-        print(f"End climb: {time.time() - t0}")
+            self._move_limb(obs, task)
         return {name: self._robot.get_joint(name) for name in JOINTS}
