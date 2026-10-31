@@ -6,8 +6,8 @@ from pathlib import Path
 
 # ================= CONFIGURATION =================
 
-LARGEUR = 1280
-HAUTEUR = 720
+LARGEUR = 640
+HAUTEUR = 480
 FPS = 30
 
 # Dossier de sauvegarde

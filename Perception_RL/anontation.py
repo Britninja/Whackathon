@@ -5,9 +5,9 @@ from pathlib import Path
 
 
 BASE = Path(__file__).resolve().parent
-DATASET = BASE / "dataset"
+DATASET = BASE / "dataset-2"
 
-NOM_IMAGE = "image_018.jpg"
+NOM_IMAGE = "image_028.jpg"
 CLASSE = 0  # prise d'escalade
 
 
@@ -22,7 +22,7 @@ for separation in ["train", "val"]:
     if candidat.exists():
         chemin_image = candidat
         chemin_label = (
-            DATASET / "labels" / separation / "image_018.txt"
+            DATASET / "labels" / separation / "image_028.txt"
         )
         break
 
