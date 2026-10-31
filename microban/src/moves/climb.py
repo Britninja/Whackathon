@@ -1,168 +1,237 @@
-import json
-from pathlib import Path
-import time
-
 import numpy as np
-import placo
-import microban_model
-from placo_utils.visualization import robot_viz, points_viz
-
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
-MAP_PATH = PROJECT_ROOT / "simulator/climbing_sim/walls" / "N1.json"
-
-with open(MAP_PATH, "r") as f:
-    _HOLDS_MAP = json.load(f)
-
-# TODO: Are these world or robot positions
-_START_HOLDS = {
-    "right_foot": _HOLDS_MAP["holds"][0],
-    "left_foot": _HOLDS_MAP["holds"][1],
-    "right_hand": _HOLDS_MAP["holds"][2],
-    "left_hand": _HOLDS_MAP["holds"][3],
-}
-
-
-MJCF_PATH = str(microban_model.mjcf(climb=True))
+import mujoco
+from collections import deque
+from microban_model import JOINTS
+from movePlaco import (BasePlacoMove, MoveRightLeg, MoveLeftLeg,
+                       MoveRightArm, MoveLeftArm)
 
 
 class ClimbMove:
-    start_pose = "current"
-    options = {"y_spacing": 0.15, "z_spacing": 0.06}
-    option_docs = {
-        "y_spacing": "Distance left foot (to right foot)",
-        "z_spacing": "hopefully hold_distance (rows)",
-    }
+    """CONTRÔLE de l'escalade : exécute une file d'actions via les MovePlaco.
+
+    Perception et planning sont EXTERNES et appellent add_action().
+    Le plan temporaire (_temporary_plan) lit N1 : à supprimer quand le vrai
+    planning sera branché.
+    """
+
+    description = "Escalade : exécute les actions d'un planificateur (Placo)."
     variants = ("climber",)
+    start_pose = "current"
 
-    def __init__(self) -> None:
-        # "Holds" position (just for visualization)
-        self._vis_holds = [
-            [0, y, z]
-            for y in [0, self.options["y_spacing"]]
-            for z in np.arange(0, 1, self.options["z_spacing"])
-        ]
+    options = {
+        "steps": 1,
+        "move_duration_s": 5.0,
+        "solver_iters": 5,
+        "pause_s": 1.5,
+        "absolute_targets": True,
+    }
+    option_docs = {
+        "steps": "Nombre de cycles (plan temporaire uniquement)",
+        "move_duration_s": "Durée d'une action (s)",
+        "solver_iters": "Itérations du solveur Placo",
+        "pause_s": "Pause entre deux actions (s)",
+        "absolute_targets": "True : viser la position absolue de la prise ; "
+                            "False : déplacement relatif entre prises",
+    }
 
-        self._robot = placo.RobotWrapper(
-            MJCF_PATH, placo.Flags.mjcf + placo.Flags.ignore_collisions
-        )
-        self._solver = placo.KinematicsSolver(self._robot)
+    LIMBS = ("right_foot", "left_foot", "right_hand", "left_hand")
 
-        # Set left foot as world origin
-        self._T_left_foot = np.eye(4)
-        self._robot.set_T_world_frame("left_foot", self._T_left_foot)
-        self._robot.update_kinematics()
+    MOVES = {
+        "right_foot": MoveRightLeg,
+        "left_foot": MoveLeftLeg,
+        "right_hand": MoveRightArm,
+        "left_hand": MoveLeftArm,
+    }
 
-        # Set center of mass to robot center of mass (in world coordinates)
-        # self._com_initial = self._robot.com_world()
-        T_right_foot = self._robot.get_T_world_frame("right_foot").copy()
-        T_right_foot[2, 3] = 0.0
+    FRAME_OF = {
+        "right_foot": "right_foot_ball",
+        "left_foot": "left_foot_ball",
+        "right_hand": "right_hand_ball",
+        "left_hand": "left_hand_ball",
+    }
 
-        # Limit knee angles
-        self._robot.set_joint_limits("left_knee", 0.01, 2.3)
-        self._robot.set_joint_limits("right_knee", 0.01, 2.3)
+    # Jambes d'abord, puis bras
+    CYCLE = ("right_foot", "left_foot", "right_hand", "left_hand")
 
-        # Ball tasks
-        right_foot_task = self._solver.add_position_task(
-            "right_foot_ball", np.array([0, 0, 0])
-        )
-        left_foot_task = self._solver.add_position_task(
-            "left_foot_ball", np.array([0, self.options["y_spacing"], 0])
-        )
-        right_hand_task = self._solver.add_position_task(
-            "right_hand_ball", np.array([0, 0, self.options["z_spacing"] * 5])
-        )
-        left_hand_task = self._solver.add_position_task(
-            "left_hand_ball",
-            np.array([0, self.options["y_spacing"], self.options["z_spacing"] * 5]),
-        )
+    def __init__(self):
+        self.sim = None
+        self.queue = deque()
+        self.move = None
+        self.pause_until = 0.0
+        self.last_cmd = None
+        self.finished = False
 
-        self._tasks = [right_foot_task, left_foot_task, right_hand_task, left_hand_task]
+    # ========================================================
+    # INTERFACE AVEC LE FUTUR PLANNING
+    # ========================================================
+    def add_action(self, limb, target_mj, prev_mj=None):
+        """Ajoute une action à exécuter.
 
-        # Keep trunk parallel to the world
-        body_orientation_task = self._solver.add_orientation_task("body", np.eye(3))
-        body_orientation_task.configure("body_orientation", "soft", 1e-3)
+        limb      : 'right_foot' | 'left_foot' | 'right_hand' | 'left_hand'
+        target_mj : position cible de la prise (m, repère monde MuJoCo)
+        prev_mj   : position de la prise actuelle du membre (m, repère MuJoCo),
+                    utilisée seulement si absolute_targets = False
+        """
+        t = np.asarray(target_mj, float)
+        p = None if prev_mj is None else np.asarray(prev_mj, float)
+        self.queue.append((limb, t, p))
 
-        # Joints -> keep them close to their zero position
-        joints_task = self._solver.add_joints_task()
-        joints_task.configure("joints", "soft", 1e-6)
+    # ========================================================
+    # PLAN TEMPORAIRE (à supprimer avec le vrai planning)
+    # ========================================================
+    def _temporary_plan(self, wall):
+        cur = {l: wall.start[l] for l in self.LIMBS}
+        for _ in range(int(self.options["steps"])):
+            for limb in self.CYCLE:
+                above = [h for h in wall.holds
+                         if h.col == cur[limb].col and h.row > cur[limb].row]
+                if not above:
+                    print(f"[Climb] plus de prise au-dessus pour {limb}")
+                    return
+                tgt = min(above, key=lambda h: h.row)
+                self.add_action(
+                    limb,
+                    target_mj=np.asarray(tgt.socket, float) + np.array([0.0, 0.0, 0.001]),
+                    prev_mj=np.asarray(cur[limb].socket, float) + np.array([0.0, 0.0, 0.001]),
+                )
+                cur[limb] = tgt
 
-        self._joints = self._robot.joint_names()
-        joints_task.set_joints({joint: 0 for joint in self._joints})
+    # ========================================================
+    # DIAGNOSTIC AU DÉMARRAGE
+    # ========================================================
+    def _mj_pos(self, name):
+        """Position monde MuJoCo d'un site / corps / géom nommé (None si introuvable)."""
+        m, d = self.sim.model, self.sim.data
+        for obj, arr in ((mujoco.mjtObj.mjOBJ_SITE, d.site_xpos),
+                         (mujoco.mjtObj.mjOBJ_BODY, d.xpos),
+                         (mujoco.mjtObj.mjOBJ_GEOM, d.geom_xpos)):
+            try:
+                i = mujoco.mj_name2id(m, obj, name)
+            except Exception:
+                i = -1
+            if i >= 0:
+                return arr[i].copy()
+        return None
 
-        # TODO: is this for not moving the body much in general?
-        self._solver.add_regularization_task(1e-3)
-        self._solver.enable_joint_limits(True)
+    def _print_diagnostic(self, obs):
+        probe = MoveRightLeg()
+        probe.start(obs)  # synchronise Placo avec MuJoCo
+        wall = self.sim.wall
 
-        # TODO: is this for calculating the neutral position ???
-        for _ in range(50):
-            self._solver.solve(True)
-            self._robot.update_kinematics()
+        print("\n[DIAG] tronc MuJoCo :", np.round(self.sim.data.qpos[0:3], 4))
+        for limb, frame in self.FRAME_OF.items():
+            p_placo = probe.model.get_T_world_frame(frame)[:3, 3]
+            p_mj = self._mj_pos(frame)
+            sock = np.asarray(wall.start[limb].socket, float)
+            print(f"[DIAG] {limb}")
+            print(f"   boule Placo    = {np.round(p_placo, 4)}")
+            print(f"   boule MuJoCo   = {None if p_mj is None else np.round(p_mj, 4)}")
+            print(f"   prise (socket) = {np.round(sock, 4)}")
+            print(f"   Placo - prise  = {np.round((p_placo - sock) * 1000, 1)} mm")
 
-        self._start_target_angles = [
-            self._robot.get_joint(name) for name in self._joints
-        ]
-        self._start_angles = self._start_target_angles.copy()
-        self._task_rotation_index = 0
+        # Axes du mur : quelle coordonnée change avec col, avec row ?
+        h = {(x.col, x.row): np.asarray(x.socket, float) for x in wall.holds}
+        if (26, 2) in h and (26, 7) in h and (21, 2) in h:
+            print("[DIAG] +5 rows =", np.round(h[(26, 7)] - h[(26, 2)], 4))
+            print("[DIAG] -5 cols =", np.round(h[(21, 2)] - h[(26, 2)], 4))
+        print()
 
-    def start(self, obs) -> None:
-        self.t0 = obs["time"]
-        self.stop_t0 = None
-        for name, angle in zip(self._joints, self._start_angles):
-            self._robot.set_joint(name, angle)
-        self._robot.set_T_world_frame("left_foot", self._T_left_foot)
-        self._robot.update_kinematics()
+    # ========================================================
+    # CONVERSION D'UN VECTEUR MuJoCo -> Placo (mode relatif)
+    # ========================================================
+    def _vec_mj_to_placo(self, v_mj):
+        qpos = self.sim.data.qpos
+        R = np.zeros(9)
+        mujoco.mju_quat2Mat(R, np.asarray(qpos[3:7], float))
+        R = R.reshape(3, 3)
+        T = self.move.model.get_T_world_fbase()
+        return T[:3, :3] @ (R.T @ np.asarray(v_mj, float))
 
-    def calc_4_waypoints(self, task, part_duration):
-        return [
-            [0, task.target_world],
-            [part_duration * 0.25, task.target_world + np.array([-0.05, 0, 0])],
-            [
-                part_duration * 0.5,
-                task.target_world + np.array([-0.05, 0, self.options["z_spacing"]]),
-            ],
-            [
-                part_duration * 0.75,
-                task.target_world
-                + np.array([-0.025, 0, self.options["z_spacing"] + 0.02]),
-            ],
-            [
-                part_duration,
-                task.target_world + np.array([0, 0, self.options["z_spacing"]]),
-            ],
-        ]  # [time, (x,y,z)]
+    # ========================================================
+    # DÉMARRAGE D'UNE ACTION
+    # ========================================================
+    def _start_action(self, obs):
+        limb, target, prev = self.queue.popleft()
+
+        self.move = self.MOVES[limb]()
+        self.move.options = dict(self.move.options)  # options = dict de classe partagé
+        self.move.options["duration_s"] = float(self.options["move_duration_s"])
+        self.move.options["solver_iters"] = int(self.options["solver_iters"])
+        self.move.start(obs)  # fixe p0 = position réelle de la boule
+
+        if self.options["absolute_targets"]:
+            delta = target - self.move.p0
+        else:
+            delta = self._vec_mj_to_placo(target - prev)
+
+        d_cm = delta * 100.0
+        (self.move.options["dx_cm"],
+         self.move.options["dy_cm"],
+         self.move.options["dz_cm"]) = d_cm
+
+        print(f"[Climb] {limb} p0={np.round(self.move.p0, 3)} "
+              f"delta={np.round(d_cm, 1)} cm")
+
+    # ========================================================
+    # API MOVE
+    # ========================================================
+    def start(self, obs):
+        self.sim = self.robot.controller.sim
+        BasePlacoMove.sim = self.sim  # pour la synchro du tronc dans movePlaco
+
+        self.queue.clear()
+        self.move = None
+        self.finished = False
+        self.pause_until = 0.0
+        self.last_cmd = None
+
+        self._print_diagnostic(obs)
+        self._temporary_plan(self.sim.wall)  # <- à retirer avec le vrai planning
+        print(f"[Climb] {len(self.queue)} actions en file.")
 
     def step(self, obs):
-        viz = robot_viz(self._robot)
-        dt = 0.02  # [s]
-        part_duration = 1.5  # [s]
-        # TODO: maybe axis task: try to avoid collision of ball with the wall of the hold
-        # TODO: parameterize, so that if a hold moves 1cm => make it so that you can reach anywhere the arms can reach => inverse kinematics
-        # Problem is a big space & there is only one solution
-        # <=> inverse kinematics = underdefined: there are many solutions, you don't know which one is the best
-        # kinematics = only geometry, not forces/torques
-        # => we migt plan a good ttrajectory, but the moteurs might not be strong enough
-        # Building a cubic trajectory for the limb that rise with clearance
-        task = self._tasks[self._task_rotation_index]
-        waypoints = self.calc_4_waypoints(task, part_duration)
+        # Action en cours
+        if self.move is not None:
+            cmd = self.move.step(obs)
+            self.last_cmd = cmd
 
-        trajectory = placo.CubicSpline3D()
-        velocity_3d = np.zeros(3)
-        for move_duration_t, pos_3d in waypoints:
-            trajectory.add_point(move_duration_t, pos_3d, velocity_3d)
+            # --- DEBUG : consigne Placo vs réalité MuJoCo (2 fois par seconde) ---
+            self._n = getattr(self, "_n", 0) + 1
+            if self._n % 25 == 0:   # à 50 Hz : deux fois par seconde
+                f = self.move.FRAME
+                tgt = self.move.tasks[f].target_world
+                real = self._mj_pos(f)
+                trunk = self.sim.data.qpos[0:3]
+                print(f"[DBG] cible={np.round(tgt, 3)} réel={np.round(real, 3)} "
+                      f"écart={np.round((tgt - real) * 1000, 0)} mm "
+                      f"tronc={np.round(trunk, 3)}")
+                for k in ("right_knee", "left_knee"):
+                    i = JOINTS.index(k)
+                    print(f"       {k}: commande={cmd[k]:.2f} réel={obs['q'][i]:.2f}")
 
-        # move_duration_t = 0
-        part_t0 = time.time()
-        while time.time() - part_t0 < part_duration:
-            task.target_world = trajectory.pos(time.time() - part_t0)
+            if obs["time"] - self.move.t0 >= self.move.options["duration_s"]:
+                f = self.move.FRAME
+                err = np.linalg.norm(
+                    self.move.tasks[f].target_world - self.move._current_pos()
+                )
+                print(f"[Climb] fin {f} : erreur Placo = {err * 1000:.1f} mm")
+                self.move = None
+                self.pause_until = obs["time"] + float(self.options["pause_s"])
+            return cmd
 
-            self._solver.solve(True)
-            self._robot.update_kinematics()
+        # Pause entre deux actions
+        if obs["time"] < self.pause_until:
+            return self.last_cmd
 
-            points_viz("holds", self._vis_holds)
+        # File vide : on garde la dernière pose et on attend d'autres actions
+        if not self.queue:
+            if not self.finished:
+                self.finished = True
+                print("[Climb] File vide, en attente.")
+            return self.last_cmd
 
-            viz.display(self._robot.state.q)
-            time.sleep(dt)
-            # move_duration_t += dt
-        self._task_rotation_index = (self._task_rotation_index + 1) % len(self._tasks)
-
-        return {name: self._robot.get_joint(name) for name in _JOINTS}
+        self.finished = False
+        self._start_action(obs)
+        cmd = self.move.step(obs)
+        self.last_cmd = cmd
+        return cmd

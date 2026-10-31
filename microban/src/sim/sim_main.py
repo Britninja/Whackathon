@@ -34,6 +34,10 @@ def main() -> None:
     args = parser.parse_args()
 
     if args.wall:
+        os.environ["MICROBAN_WALL"] = args.wall
+
+
+    if args.wall:
         try:
             from climbing_sim import ClimbingSim
         except ModuleNotFoundError as e:
